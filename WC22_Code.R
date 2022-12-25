@@ -1,0 +1,198 @@
+## WC data project
+## November - December 2022
+
+## Packages
+library(readxl)
+library(tidyverse)
+library(kableExtra)
+library(stringr)
+library(ggimage)
+library(jpeg)
+library(hrbrthemes)
+
+## Early round leaderboard: Data  
+dat <- read_excel("Documents/R_Proj/WC2022/Data_master.xlsx")
+
+dat <- dat %>%
+  mutate(pct = round(Correct/(48 - missing),2)*100)
+
+# Barplot
+dat %>% 
+  filter(Dude != "The real doc") %>% 
+  ggplot(aes(reorder(Dude, +Pts), Pts)) +
+  geom_bar(stat = "identity", width = 0.9, fill = "skyblue", alpha = 0.8, position = position_dodge(0.8)) +
+  geom_text(aes(label = paste0(Correct, " Correct")), hjust = 1.2, color = "black", fontface = "bold") +
+  geom_rect(aes(ymin=82, ymax=88, xmin=-Inf, xmax=Inf), fill="darkcyan") +
+  geom_text(aes(x=Dude, y=85, label = 48 - missing), color = "white", size = 5, fontface = "bold") +
+  geom_text(data = filter(dat, Dude == "Nik"), 
+            aes(x=Dude, y=85, label = "G. Bet"), color = "white", size = 3.5, fontface = "bold", vjust = -1.5) +
+  geom_rect(aes(ymin=88, ymax=94, xmin=-Inf, xmax=Inf), fill="grey") +
+  geom_text(aes(x=Dude, y=91, label = paste0(pct, "%") ), color = "black", size = 4.5, fontface = "bold") +
+  geom_text(data = filter(dat, Dude == "Nik"), 
+            aes(x=Dude, y=91, label = "Win %"), color = "black", size = 4, fontface = "bold", vjust = -1.5) +
+  xlab("") + ylab("Current Points (3 per correct bet)") +
+  theme_bw() + coord_flip() +
+  theme(axis.text = element_text(size = 12, face = "bold"))
+
+# Saving plot to jpeg image
+ggsave("~/Documents/R_Proj/WC2022/wc4.jpeg", width = 8, height = 6, units = "in", dpi = 300, bg = "white")
+
+## Early round: game-by-game selections table
+# Data
+dat1 <- read_excel("Documents/R_Proj/WC2022/Data_master.xlsx", sheet = "games")
+
+# Tab using kableExtra
+dat1 %>%
+  select(-grp,-num,-`The real doc`) %>% 
+  kbl(col.names = c("Game", "Winner", "Malik(a)", "The Indian one", "The Black one",
+                    "Kabbabon", "Nakash", "Yoss", "Nik"), booktabs = T,
+      caption = "2022 World Cup: Game Bets") %>%
+  kable_classic(full_width = F, html_font = "Cambria", font_size=11) %>% 
+  add_header_above(c(" " = 1, " "= 1, "The betting Dude"= 7)) %>% 
+  pack_rows("Group A", 1, 6) %>% 
+  pack_rows("Game 1", 1, 2) %>% 
+  pack_rows("Game 2", 3, 4) %>%  
+  pack_rows("Game 3", 5, 6) %>% 
+  pack_rows("Group B", 7, 12) %>% 
+  pack_rows("Game 1", 7, 8) %>% 
+  pack_rows("Game 2", 9, 10) %>%
+  pack_rows("Game 3", 11, 12) %>% 
+  pack_rows("Group C", 13, 18) %>% 
+  pack_rows("Game 1", 13, 14) %>% 
+  pack_rows("Game 2", 15, 16) %>% 
+  pack_rows("Game 3", 17, 18) %>% 
+  pack_rows("Group D", 19, 24) %>%
+  pack_rows("Game 1", 19, 20) %>% 
+  pack_rows("Game 2", 21, 22) %>% 
+  pack_rows("Game 3", 23, 24) %>% 
+  pack_rows("Group E", 25, 30) %>% 
+  pack_rows("Game 1", 25, 26) %>% 
+  pack_rows("Game 2", 27, 28) %>% 
+  pack_rows("Game 3", 29, 30) %>% 
+  pack_rows("Group F", 31, 36) %>%
+  pack_rows("Game 1", 31, 32) %>% 
+  pack_rows("Game 2", 33, 34) %>% 
+  pack_rows("Game 3", 35, 36) %>% 
+  pack_rows("Group G", 37, 42) %>%
+  pack_rows("Game 1", 37, 38) %>% 
+  pack_rows("Game 2", 39, 40) %>% 
+  pack_rows("Game 3", 41, 42) %>% 
+  pack_rows("Group H", 43, 48) %>%
+  pack_rows("Game 1", 43, 44) %>% 
+  pack_rows("Game 2", 45, 46) %>% 
+  pack_rows("Game 3", 47, 48) %>% 
+  column_spec(3, bold = T, color = "white", background = ifelse(str_detect(dat1$`Malik(a)`, dat1$winner), "green","red")) %>% 
+  column_spec(4, bold = T, color = "white", background = ifelse(str_detect(dat1$`The Indian one`, dat1$winner), "green","red")) %>% 
+  column_spec(5, bold = T, color = "white", background = ifelse(str_detect(dat1$`The Black one`, dat1$winner), "green","red")) %>% 
+  column_spec(6, bold = T, color = "white", background = ifelse(str_detect(dat1$Kabbabon, dat1$winner), "green","red")) %>% 
+  column_spec(7, bold = T, color = "white", background = ifelse(str_detect(dat1$Nakash, dat1$winner), "green","red")) %>% 
+  column_spec(8, bold = T, color = "white", background = ifelse(str_detect(dat1$Yoss, dat1$winner), "green","red")) %>% 
+  column_spec(9, bold = T, color = "white", background = ifelse(str_detect(dat1$Nik, dat1$winner), "green","red")) 
+
+
+## Finals winner
+# Data
+dat2 <- read_excel("~/WC2022/Data_master.xlsx", sheet = "gen")
+
+# Upload pics 
+p_path <- "~/Documents/R_Proj/WC2022/"
+asp_r <- 1.3
+
+fr <- paste0(p_path, "FR.jpg")
+br <- paste0(p_path, "BR.jpg")
+ar <- paste0(p_path, "AR.jpg")
+pl <- paste0(p_path, "PL.jpg")
+
+dat2$img <- NA
+dat2$img[dat2$Pick == "BR"] <- br
+dat2$img[dat2$Pick == "FR"] <- fr
+dat2$img[dat2$Pick == "AR"] <- ar
+dat2$img[dat2$Pick == "PL"] <- pl
+
+# Plot
+ggplot(dat2, aes(x=Dude, y=0.05, image = img)) +
+  geom_image(aes(y=0),size = 0.1, asp = asp_r) +
+  geom_text(aes(x=4,y=0.03, label = "Finals winner is..."), size = 5, color = "navyblue") +
+  geom_text(aes(x=5.5,y=0.02, label = "Out of it"), size = 4.5) +
+  geom_text(aes(x=1.5,y=0.02, label = "Come'on"), size = 4.5) +
+  geom_text(aes(x=3,y=0.02, label = "Nailed it"), size = 4.5) +
+  geom_segment(x=1.5,y=0.018,xend=2,yend=0.005, arrow = arrow()) +
+  geom_segment(x=1.5,y=0.018,xend=1,yend=0.005, arrow = arrow()) +
+  geom_segment(x=3,y=0.018,xend=3,yend=0.005, arrow = arrow()) +
+  geom_segment(x=5.5,y=0.018,xend=4,yend=0.005, arrow = arrow()) +
+  geom_segment(x=5.5,y=0.018,xend=5,yend=0.005, arrow = arrow()) +
+  geom_segment(x=5.5,y=0.018,xend=6,yend=0.005, arrow = arrow()) +
+  geom_segment(x=5.5,y=0.018,xend=7,yend=0.005, arrow = arrow()) +
+  ylim(0,0.05) + ylab("") +
+  theme_classic() + theme(axis.ticks.y = element_blank(),
+                          axis.text.y = element_blank(), 
+                          panel.grid = element_blank()) +
+  easy_remove_y_axis()
+
+# Saving plot to jpeg image
+ggsave("~/WC2022/wc4.jpeg", width = 8, height = 6, units = "in", dpi = 300, bg = "white")
+
+## Knock-out rounds: Leaderboard
+# Data
+dat3 <- read_excel("~/Documents/R_Proj/WC2022/Data_master.xlsx")
+dat3 <- dat3 %>%
+  mutate(pct = round((Correct+Knockout)/(64 - missing),2)*100)
+
+# Lolli-pop plot of leader in points
+dat3 %>% 
+  filter(Dude != "The real doc") %>% 
+  ggplot(aes(x=reorder(Dude, -pt),y=pt)) +
+  geom_segment(aes(xend=Dude, yend=0), color="grey") +
+  geom_text(aes(x=Dude, y=pt, label=pt), size=4, fontface = "bold", color = "black") +
+  geom_label(aes(y=5, label = paste0("Overall win % \n",pct,"%")), colour = "white", fill = "navyblue", fontface="bold") +
+  geom_point(color="red", size=8, alpha = 0.5) +
+  geom_label(aes(x=Dude, y=pt-10, label = paste0("K/O Guess \n", Knockout, "/16 correct")),colour = "black", fill = "yellow") +
+  ylab("Total points") + xlab("") + scale_x_discrete(labels = c("Yoss" ="Yoss & Doc")) +
+  theme_ipsum() +
+  theme(axis.text = element_text(size = 12, face = "bold"))
+
+
+## Knock-out rounds: game-by-game selections 
+# Data
+dat4 <- read_excel("Documents/R_Proj/WC2022/Data_master.xlsx",sheet = "round16")
+
+dat4a <- dat4 %>% 
+  gather(game,bet,`Holland - USA`:`France - Argentina`, -Dude) %>% 
+  arrange(game)
+
+# Define rounds for facets
+dat4a$rd <- "Round - 16"
+dat4a$rd[dat4a$game == "Croatia - Brazil" | dat4a$game == "Holland - Argentina" |
+           dat4a$game == "Morocco - Portugal" | dat4a$game == "England - France"] <- "Quarter"
+dat4a$rd[dat4a$game == "Croatia - Argentina" | dat4a$game == "France - Morocco"] <- "Final - 4"
+dat4a$rd[dat4a$game == "Croatia - Morocco" | dat4a$game == "France - Argentina"] <- "Final - 2 \n 3rd place"
+
+dat4a$g1 <- 0
+dat4a$g1[dat4a$rd == "Round - 16" & (dat4a$bet == "Holland" | dat4a$bet == "Argentina" | 
+                                       dat4a$bet == "France" | dat4a$bet == "England" | dat4a$bet == "Croatia" | dat4a$bet == "Brazil" |
+                                       dat4a$bet == "Morocco" | dat4a$bet == "Portugal")] <- 1
+
+dat4a$g1[dat4a$rd == "Quarter" & (dat4a$bet == "Argentina" | dat4a$bet == "Croatia" | 
+                                    dat4a$bet == "Morocco" | dat4a$bet == "France")] <- 1
+dat4a$g1[dat4a$rd == "Final - 2 \n 3rd place" & (dat4a$bet == "Croatia" | dat4a$bet == "Argentina")] <- 1
+
+dat4a$g1[dat4a$rd == "Final - 4" & (dat4a$bet == "Argentina" | dat4a$bet == "France")] <- 1
+
+# Plot using geom_tile
+ggplot(dat4a, aes(x=Dude,y=game), height = 0.97, width = 0.95) +
+  geom_tile(aes(fill = factor(g1)), colour = "white") +
+  geom_text(aes(label = bet), size = 4, color = "white") +
+  scale_fill_manual(values = c("red","blue","#669999")) +
+  scale_x_discrete(position = "top", labels = c("Yoss_doc" = "Yoss & Doc.")) +
+  scale_y_discrete(expand = c(0,0)) +
+  xlab("") + ylab("") +
+  facet_grid(rd~., scales = "free_y") +
+  theme_classic() + theme(legend.position = "none",
+                          axis.text.x =  element_text(size = 11, face = "bold"),
+                          axis.ticks.x = element_blank())
+
+
+
+
+
+
